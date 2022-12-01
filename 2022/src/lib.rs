@@ -11,7 +11,7 @@ pub fn read_input(day: u8) -> String {
 
 type Part<T> = fn(&str) -> T;
 
-pub fn print_results<T: Display>(input: &str, p1: Part<T>, p2: Part<T>) {
+pub fn print_results<T: Display, U: Display>(input: &str, p1: Part<T>, p2: Part<U>) {
     println!("Part 1: {}", p1(input));
     println!("Part 2: {}", p2(input));
 }
