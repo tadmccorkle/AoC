@@ -1,0 +1,27 @@
+use aoc2022;
+
+fn part1(input: &str) -> String {
+    String::from("solution not yet implemented")
+}
+
+fn part2(input: &str) -> String {
+    String::from("solution not yet implemented")
+}
+
+fn main() {
+    let input = aoc2022::read_input(DAY);
+    aoc2022::print_results(&input, part1, part2);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn part1_example() {
+    }
+
+    #[test]
+    fn part2_example() {
+    }
+}

@@ -13,11 +13,23 @@ fn part1(input: &str) -> u32 {
     });
 
     // check to see if the final elf had the most calories
-    if result.0 > result.1 { result.0 } else { result.1 }
+    if result.0 > result.1 {
+        result.0
+    } else {
+        result.1
+    }
 }
 
-fn part2(_input: &str) -> String {
-    String::from("solution not yet implemented")
+fn part2(input: &str) -> u32 {
+    let mut sums: Vec<u32> = input
+        .split("\n\n")
+        .map(|elf| {
+            elf.lines()
+                .fold(0, |acc, l| acc + l.parse::<u32>().unwrap())
+        })
+        .collect();
+    sums.sort();
+    sums.iter().rev().take(3).sum()
 }
 
 fn main() {
@@ -29,9 +41,7 @@ fn main() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn part1_example() {
-        let input =  "1000
+    const INPUT: &str = "1000
 2000
 3000
 
@@ -45,6 +55,14 @@ mod tests {
 9000
 
 10000";
-        assert_eq!(part1(&input), 24000);
+
+    #[test]
+    fn part1_example() {
+        assert_eq!(part1(INPUT), 24000);
+    }
+
+    #[test]
+    fn part2_example() {
+        assert_eq!(part2(INPUT), 45000);
     }
 }
