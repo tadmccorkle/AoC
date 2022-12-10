@@ -47,10 +47,7 @@ impl Point {
         let x_diff = other.x - self.x;
         let y_diff = other.y - self.y;
 
-        if i32::abs(x_diff) == 2 {
-            self.x += x_diff.signum();
-            self.y += y_diff.signum();
-        } else if i32::abs(y_diff) == 2 {
+        if i32::abs(x_diff) == 2 || i32::abs(y_diff) == 2 {
             self.x += x_diff.signum();
             self.y += y_diff.signum();
         }
