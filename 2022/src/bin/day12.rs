@@ -63,20 +63,22 @@ fn traverse_from(start_id: NodeId, nodes: &Vec<Vec<LocationNode>>) -> HashMap<No
     while !unvisited.is_empty() {
         let (_, current) = unvisited
             .iter()
-            .min_by_key(|(id, _)| distance_from_start.get(id).unwrap())
+            .min_by_key(|&(id, _)| distance_from_start.get(id).unwrap())
             .unwrap();
 
-        if *distance_from_start.get(&current.id).unwrap() == u32::MAX {
+        let &dist = distance_from_start.get(&current.id).unwrap();
+        if dist == u32::MAX {
             break;
         }
 
-        for traversable in current.connections.iter() {
-            let dist = distance_from_start.get(&current.id).unwrap() + 1;
-            if dist < *distance_from_start.get(traversable).unwrap() {
+        let dist = dist + 1;
+        for &traversable in current.connections.iter() {
+            let &dist_to_traversable = distance_from_start.get(&traversable).unwrap();
+            if dist < dist_to_traversable {
                 distance_from_start
-                    .entry(*traversable)
+                    .entry(traversable)
                     .and_modify(|d| *d = dist);
-                previous.insert(*traversable, Some(current.id));
+                previous.insert(traversable, Some(current.id));
             }
         }
 
