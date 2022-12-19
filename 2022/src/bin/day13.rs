@@ -1,30 +1,136 @@
+use std::{cmp::Ordering, iter::Peekable, str::Chars};
+
 use aoc2022;
 
-fn compare(left: &str, right: &str) -> bool {
-    let mut in_order = true;
-    let mut l_chars = left.chars();
-    let mut r_chars = right.chars();
-    while let (Some(l), Some(r)) = (l_chars.next(), r_chars.next()) {
+#[derive(Eq)]
+enum ListItem {
+    Number(u32),
+    List(Vec<ListItem>),
+}
 
+impl ListItem {
+    fn list_cmp(left: &Vec<Self>, right: &Vec<Self>) -> Ordering {
+        let (mut left_iter, mut right_iter) = (left.iter(), right.iter());
+        let mut ordering = Ordering::Equal;
+        while ordering == Ordering::Equal {
+            ordering = match (left_iter.next(), right_iter.next()) {
+                (Some(l), Some(r)) => l.partial_cmp(r).unwrap(),
+                (None, None) => break,
+                (l, _) => {
+                    if l.is_some() {
+                        Ordering::Greater
+                    } else {
+                        Ordering::Less
+                    }
+                }
+            };
+        }
+
+        ordering
+    }
+}
+
+impl Ord for ListItem {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (ListItem::List(self_list), ListItem::List(other_list)) => {
+                ListItem::list_cmp(self_list, other_list)
+            }
+            (ListItem::List(_), ListItem::Number(n)) => {
+                self.cmp(&ListItem::List(Vec::from([ListItem::Number(*n)])))
+            }
+            (ListItem::Number(n), ListItem::List(_)) => {
+                ListItem::List(Vec::from([ListItem::Number(*n)])).cmp(other)
+            }
+            (ListItem::Number(self_number), ListItem::Number(other_number)) => {
+                self_number.cmp(other_number)
+            }
+        }
+    }
+}
+
+impl PartialOrd for ListItem {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for ListItem {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
+}
+
+fn parse_number(initial: char, input: &mut Peekable<Chars>) -> ListItem {
+    let mut number = String::from(initial);
+    while let Some(value) = input.peek() {
+        if value.is_digit(10) {
+            number.push(input.next().unwrap());
+        } else {
+            break;
+        }
     }
 
-    in_order
+    ListItem::Number(number.parse().unwrap())
+}
+
+fn parse_list(input: &mut Peekable<Chars>) -> Vec<ListItem> {
+    let mut list = Vec::new();
+    while let Some(value) = input.next() {
+        if value.is_digit(10) {
+            list.push(parse_number(value, input));
+        } else if value == '[' {
+            list.push(ListItem::List(parse_list(input)));
+        } else if value == ']' {
+            break;
+        }
+    }
+
+    list
+}
+
+fn parse(input: &str) -> Vec<ListItem> {
+    parse_list(&mut input.chars().peekable())
 }
 
 fn part1(input: &str) -> usize {
     input
         .split("\n\n")
-        .enumerate()
-        .filter(|(_, pair)| {
+        .map(|pair| {
             let (left, right) = pair.split_once('\n').unwrap();
-            compare(left, right)
+            (parse(left), parse(right))
         })
-        .map(|(i, _)| i)
+        .enumerate()
+        .filter(|(_, (left, right))| ListItem::list_cmp(left, right) != Ordering::Greater)
+        .map(|(i, _)| i + 1)
         .sum()
 }
 
-fn part2(input: &str) -> String {
-    String::from("solution not yet implemented")
+fn get_dividers() -> [ListItem; 2] {
+    [
+        ListItem::List(Vec::from([ListItem::Number(2)])),
+        ListItem::List(Vec::from([ListItem::Number(6)])),
+    ]
+}
+
+fn part2(input: &str) -> usize {
+    let mut packets: Vec<_> = input
+        .split_whitespace()
+        .map(|packet| parse(packet))
+        .collect();
+
+    for divider in get_dividers() {
+        packets.push(Vec::from([divider]));
+    }
+    packets.sort();
+
+    let dividers = get_dividers();
+    packets
+        .iter()
+        .enumerate()
+        .filter(|&(_, packet)| packet.len() == 1 && dividers.contains(packet.first().unwrap()))
+        .map(|(i, _)| i + 1)
+        .product()
 }
 
 fn main() {
@@ -67,6 +173,6 @@ mod tests {
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(INPUT), "");
+        assert_eq!(part2(INPUT), 140);
     }
 }
