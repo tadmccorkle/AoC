@@ -127,7 +127,7 @@ fn connect_valves(valves: &mut HashMap<ValveId, Valve>) {
     }
 }
 
-fn max_pressure_release_solo(
+fn max_pressure_release(
     valves: &HashMap<ValveId, Valve>,
     current_valve_id: ValveId,
     unreleased_valves: &HashSet<ValveId>,
@@ -157,7 +157,7 @@ fn max_pressure_release_solo(
         .iter()
         .filter(|&(id, _)| unreleased_valves.contains(id))
         .map(|&(id, distance)| {
-            max_pressure_release_solo(
+            max_pressure_release(
                 valves,
                 id,
                 &unreleased_valves,
@@ -182,136 +182,47 @@ fn part1(input: &str) -> u32 {
         .collect();
     let time_remaining = 30;
 
-    max_pressure_release_solo(&valves, initial_valve, &unreleased_valves, time_remaining)
-}
-
-fn max_pressure_release_teamwork(
-    valves: &HashMap<ValveId, Valve>,
-    current_valve_ids: (ValveId, ValveId),
-    unreleased_valves: &HashSet<ValveId>,
-    time_remaining: (i32, i32),
-) -> u32 {
-    if time_remaining.0 <= 1 && time_remaining.1 <= 1 {
-        return 0;
-    }
-
-    let mut unreleased_valves = unreleased_valves.clone();
-    unreleased_valves.remove(&current_valve_ids.0);
-    unreleased_valves.remove(&current_valve_ids.1);
-
-    let current_valves = (
-        valves.get(&current_valve_ids.0).unwrap(),
-        valves.get(&current_valve_ids.1).unwrap(),
-    );
-    let time_after_current_valves = (
-        if current_valves.0.flow_rate > 0 {
-            time_remaining.0 - 1
-        } else {
-            time_remaining.0
-        },
-        if current_valves.1.flow_rate > 0 {
-            time_remaining.1 - 1
-        } else {
-            time_remaining.1
-        },
-    );
-
-    let mut total_current_valve_release = 0;
-    if time_after_current_valves.0 > 0 {
-        total_current_valve_release +=
-            current_valves.0.flow_rate * (time_after_current_valves.0 as u32);
-    }
-    if time_after_current_valves.1 > 0 {
-        total_current_valve_release +=
-            current_valves.1.flow_rate * (time_after_current_valves.1 as u32)
-    }
-
-    if unreleased_valves.is_empty() {
-        return total_current_valve_release;
-    }
-
-    let connection_combinations = current_valves
-        .0
-        .connections
-        .iter()
-        .filter(|&(id, _)| unreleased_valves.contains(id))
-        .flat_map(|a| {
-            current_valves
-                .1
-                .connections
-                .iter()
-                .filter(|&(id, _)| unreleased_valves.contains(id))
-                .map(move |b| (a, b))
-        });
-
-    let total_valve_connections_release = connection_combinations
-        .map(|(valve_1, valve_2)| {
-            if valve_1.0 == valve_2.0 {
-                if unreleased_valves.len() > 1 {
-                    return 0;
-                }
-
-                return max_pressure_release_solo(
-                    valves,
-                    valve_1.0,
-                    &unreleased_valves,
-                    time_after_current_valves.0 - valve_1.1 as i32,
-                )
-                .max(max_pressure_release_solo(
-                    valves,
-                    valve_2.0,
-                    &unreleased_valves,
-                    time_after_current_valves.1 - valve_2.1 as i32,
-                ));
-            }
-
-            max_pressure_release_teamwork(
-                valves,
-                (valve_1.0, valve_2.0),
-                &unreleased_valves,
-                (
-                    time_after_current_valves.0 - valve_1.1 as i32,
-                    time_after_current_valves.1 - valve_2.1 as i32,
-                ),
-            )
-        })
-        .max()
-        .unwrap();
-
-    total_current_valve_release + total_valve_connections_release
+    max_pressure_release(&valves, initial_valve, &unreleased_valves, time_remaining)
 }
 
 fn part2(input: &str) -> u32 {
     let mut valves = parse_valves(input);
     connect_valves(&mut valves);
 
-    let initial_valve = valves.get(&Valve::id_from("AA").unwrap()).unwrap();
-    let unreleased_valves: HashSet<_> = valves
+    let initial_valve_id = Valve::id_from("AA").unwrap();
+    let unreleased_valves: Vec<_> = valves
         .iter()
         .filter(|(_, valve)| valve.flow_rate > 0)
         .map(|(&id, _)| id)
         .collect();
 
-    let unreleased_connections: Vec<_> = initial_valve
-        .connections
-        .iter()
-        .filter(|(id, _)| unreleased_valves.contains(id))
-        .collect();
-    let mut max_pressure_release = 0;
-    for i in 0..(unreleased_connections.len() - 1) {
-        for j in (i + 1)..unreleased_connections.len() {
-            let (&(next_id_1, next_distance_1), &(next_id_2, next_distance_2)) =
-                (unreleased_connections[i], unreleased_connections[j]);
-            max_pressure_release = max_pressure_release.max(max_pressure_release_teamwork(
-                &valves,
-                (next_id_1, next_id_2),
-                &unreleased_valves,
-                (26 - next_distance_1 as i32, 26 - next_distance_2 as i32),
-            ));
+    let mut unique_subset_pairs = Vec::new();
+    let unreleased_valve_count = unreleased_valves.len();
+    for i in 0..(1 << unreleased_valve_count) {
+        if i & 1 == 1 {
+            continue;
         }
+
+        let mut subset1 = HashSet::new();
+        let mut subset2 = HashSet::new();
+        for j in 0..unreleased_valve_count {
+            if i & (1 << j) == 0 {
+                subset1.insert(unreleased_valves[j]);
+            } else {
+                subset2.insert(unreleased_valves[j]);
+            }
+        }
+        unique_subset_pairs.push((subset1, subset2));
     }
 
-    max_pressure_release
+    unique_subset_pairs
+        .iter()
+        .map(|(a, b)| {
+            max_pressure_release(&valves, initial_valve_id, a, 26)
+                + max_pressure_release(&valves, initial_valve_id, b, 26)
+        })
+        .max()
+        .unwrap()
 }
 
 fn main() {
