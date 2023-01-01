@@ -52,11 +52,6 @@ fn traverse_from(start_id: NodeId, nodes: &Vec<Vec<LocationNode>>) -> HashMap<No
         .flatten()
         .map(|n| (n.id, if n.id == start_id { 0 } else { u32::MAX }))
         .collect();
-    let mut previous: HashMap<NodeId, Option<NodeId>> = nodes
-        .iter()
-        .flatten()
-        .map(|n| (n.id, Option::None))
-        .collect();
     let mut unvisited: HashMap<NodeId, &LocationNode> =
         nodes.iter().flatten().map(|n| (n.id, n)).collect();
 
@@ -78,7 +73,6 @@ fn traverse_from(start_id: NodeId, nodes: &Vec<Vec<LocationNode>>) -> HashMap<No
                 distance_from_start
                     .entry(traversable)
                     .and_modify(|d| *d = dist);
-                previous.insert(traversable, Some(current.id));
             }
         }
 
