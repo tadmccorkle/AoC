@@ -71,8 +71,7 @@ fn count_overlapping(grouped_components: HashMap<(i32, i32), BinaryHeap<i32>>) -
         .sum()
 }
 
-fn part1(input: &str) -> i32 {
-    let cubes: Vec<Cube> = input.lines().map(|line| line.parse().unwrap()).collect();
+fn get_surface_area(cubes: &Vec<Cube>) -> i32 {
     let same_xy = group_by(&cubes, CubeComponentGrouping::XY);
     let same_xz = group_by(&cubes, CubeComponentGrouping::XZ);
     let same_yz = group_by(&cubes, CubeComponentGrouping::YZ);
@@ -83,6 +82,12 @@ fn part1(input: &str) -> i32 {
     let cube_count = cubes.len() as i32;
 
     (cube_count * 6) - (overlapping_face_count * 2)
+}
+
+fn part1(input: &str) -> i32 {
+    let cubes: Vec<Cube> = input.lines().map(|line| line.parse().unwrap()).collect();
+
+    get_surface_area(&cubes)
 }
 
 fn get_internal_cubes(cubes: &Vec<Cube>) -> Vec<Cube> {
@@ -145,24 +150,9 @@ fn get_internal_cubes(cubes: &Vec<Cube>) -> Vec<Cube> {
 
 fn part2(input: &str) -> i32 {
     let cubes: Vec<Cube> = input.lines().map(|line| line.parse().unwrap()).collect();
-    let same_xy = group_by(&cubes, CubeComponentGrouping::XY);
-    let same_xz = group_by(&cubes, CubeComponentGrouping::XZ);
-    let same_yz = group_by(&cubes, CubeComponentGrouping::YZ);
-    let overlapping_face_count =
-        count_overlapping(same_xy) + count_overlapping(same_xz) + count_overlapping(same_yz);
-    let cube_count = cubes.len() as i32;
-    let total_surface_area = (cube_count * 6) - (overlapping_face_count * 2);
-
     let internal_cubes = get_internal_cubes(&cubes);
-    let same_xy = group_by(&internal_cubes, CubeComponentGrouping::XY);
-    let same_xz = group_by(&internal_cubes, CubeComponentGrouping::XZ);
-    let same_yz = group_by(&internal_cubes, CubeComponentGrouping::YZ);
-    let overlapping_face_count =
-        count_overlapping(same_xy) + count_overlapping(same_xz) + count_overlapping(same_yz);
-    let cube_count = internal_cubes.len() as i32;
-    let internal_surface_area = (cube_count * 6) - (overlapping_face_count * 2);
 
-    total_surface_area - internal_surface_area
+    get_surface_area(&cubes) - get_surface_area(&internal_cubes)
 }
 
 fn main() {
