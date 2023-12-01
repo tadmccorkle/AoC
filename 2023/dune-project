@@ -1,0 +1,20 @@
+(lang dune 3.6)
+
+(name 2023)
+
+(generate_opam_files true)
+
+(source
+ (github tadmccorkle/AoC))
+
+(authors "Tad McCorkle")
+
+(license MIT)
+
+(package
+ (name 2023)
+ (synopsis "AoC 2023")
+ (description "Advent of Code 2023, OCaml Edition")
+ (depends ocaml dune))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
