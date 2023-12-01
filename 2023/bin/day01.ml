@@ -24,9 +24,39 @@ let rec sum values =
   | line :: rest ->
     (match String.fold_left cal_digs (None, None) line with
      | Some a, Some b -> (10 * a) + b + sum rest
-     | _ -> 0)
+     | _ -> raise (Failure "Failed to read input"))
 ;;
 
 (* part 1 *)
 let () = print_endline (string_of_int (sum input))
+let r = Str.regexp {|[0-9]\|one\|two\|three\|four\|five\|six\|seven\|eight\|nine|}
+let nums = [ "one"; "two"; "three"; "four"; "five"; "six"; "seven"; "eight"; "nine" ]
 
+let rec find_index l x =
+  match l with
+  | [] -> raise Not_found
+  | hd :: rest -> if hd = x then 0 else 1 + find_index rest x
+;;
+
+let int_of_num num =
+  try 1 + find_index nums num with
+  | Not_found -> int_of_string num
+;;
+
+let rec sum_2 values =
+  match values with
+  | [] -> 0
+  | line :: rest ->
+    (try
+       let _ = Str.search_forward r line 0 in
+       let a = int_of_num (Str.matched_string line) in
+       let len = String.length line in
+       let _ = Str.search_backward r line (len - 1) in
+       let b = int_of_num (Str.matched_string line) in
+       (10 * a) + b + sum_2 rest
+     with
+     | Not_found -> raise (Failure "Failed to read input"))
+;;
+
+(* part 2 *)
+let () = print_endline (string_of_int (sum_2 input))
