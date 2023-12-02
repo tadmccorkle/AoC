@@ -1,2 +1,6 @@
-profile = janestreet
+profile = default
 version = 0.24.1
+
+margin = 100
+module-item-spacing = preserve
+break-cases = all

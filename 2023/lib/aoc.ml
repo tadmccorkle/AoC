@@ -11,16 +11,14 @@ let read_input day =
       read_lines (line :: acc)
     with
     | End_of_file ->
-      close_in channel;
-      List.rev acc
+        close_in channel;
+        List.rev acc
   in
   read_lines []
-;;
 
 let rec print_all lines =
   match lines with
   | [] -> ()
   | x :: rest ->
-    print_endline x;
-    print_all rest
-;;
+      print_endline x;
+      print_all rest
