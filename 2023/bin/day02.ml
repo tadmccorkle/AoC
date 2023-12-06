@@ -13,7 +13,7 @@ let build bag cubes =
   | [ c; "blue" ] ->
       let i = int_of_string c in
       if i > bag.b then { bag with b = i } else bag
-  | _ -> raise (Failure "Failed to read input")
+  | _ -> Aoc.raise_input_failure ()
 
 let get_game_bag record =
   let s = String.split_on_char ':' record in
