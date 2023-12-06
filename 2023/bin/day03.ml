@@ -1,6 +1,8 @@
+open StdLabels
+
 let input = Aoc.read_input 3
 
-let sum_list l = List.fold_left (fun sum x -> sum + x) 0 l
+let sum_list l = l |> List.fold_left ~f:(fun sum x -> sum + x) ~init:0
 
 (* inclusive range [a,b] *)
 let ( -- ) a b =
@@ -47,8 +49,8 @@ let is_part_number row col len =
     match range with
     | [] -> false
     | r :: rest ->
-        let sub = String.sub (List.nth input r) start_col (end_col - start_col + 1) in
-        String.exists is_symbol sub || symbol_exists rest
+        let sub = String.sub (List.nth input r) ~pos:start_col ~len:(end_col - start_col + 1) in
+        String.exists ~f:is_symbol sub || symbol_exists rest
   in
   symbol_exists (start_row -- end_row)
 
@@ -58,15 +60,17 @@ let rec collect_part_numbers row ?(col = 0) line =
       let n_end = find_num_end line (n_start + 1) in
       let len = n_end - n_start in
       if is_part_number row n_start len then
-        let pn = String.sub line n_start len in
+        let pn = String.sub line ~pos:n_start ~len in
         int_of_string pn :: collect_part_numbers row line ~col:n_end
       else collect_part_numbers row line ~col:n_end
   | None -> []
 
 (* part 1 *)
 let () =
-  let part_numbers = List.mapi (fun i line -> collect_part_numbers i line) input in
-  let sum = List.fold_left (fun sum part_numbers -> sum + sum_list part_numbers) 0 part_numbers in
+  let part_numbers = input |> List.mapi ~f:(fun i line -> collect_part_numbers i line) in
+  let sum =
+    part_numbers |> List.fold_left ~f:(fun sum part_numbers -> sum + sum_list part_numbers) ~init:0
+  in
   print_endline (string_of_int sum)
 
 module SchematicNumber = struct
@@ -91,19 +95,19 @@ let rec collect_gear_ratios row ?(col = 0) line =
       let c1 = min (String.length line - 1) (col + 1) in
       let schematic_numbers =
         List.fold_left
-          (fun nums r ->
+          ~f:(fun nums r ->
             let line = List.nth input r in
             List.fold_left
-              (fun nums c ->
+              ~f:(fun nums c ->
                 match line.[c] with
                 | '0' .. '9' ->
                     let num_start = find_num_start line c in
                     let num_end = find_num_end line (c + 1) in
-                    let num = String.sub line num_start (num_end - num_start) in
+                    let num = String.sub line ~pos:num_start ~len:(num_end - num_start) in
                     (num_start, num_end, num) :: nums
                 | _ -> nums)
-              nums (c0 -- c1))
-          [] (r0 -- r1)
+              ~init:nums (c0 -- c1))
+          ~init:[] (r0 -- r1)
       in
       match SNSet.elements (SNSet.of_list schematic_numbers) with
       | [ (_, _, n1); (_, _, n2) ] ->
@@ -115,6 +119,8 @@ let rec collect_gear_ratios row ?(col = 0) line =
 
 (* part 2 *)
 let () =
-  let gear_ratios = List.mapi (fun i line -> collect_gear_ratios i line) input in
-  let sum = List.fold_left (fun sum line_ratios -> sum + sum_list line_ratios) 0 gear_ratios in
+  let gear_ratios = input |> List.mapi ~f:(fun i line -> collect_gear_ratios i line) in
+  let sum =
+    gear_ratios |> List.fold_left ~f:(fun sum line_ratios -> sum + sum_list line_ratios) ~init:0
+  in
   print_endline (string_of_int sum)

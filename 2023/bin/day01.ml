@@ -34,7 +34,7 @@ let () =
     | Some a, Some b -> (10 * a) + b
     | _ -> Aoc.raise_input_failure ()
   in
-  let sum = List.fold_left ~f:(fun acc line -> acc + get_cal_val line) ~init:0 input in
+  let sum = input |> List.fold_left ~f:(fun acc line -> acc + get_cal_val line) ~init:0 in
   print_endline (string_of_int sum)
 
 let nums =
@@ -87,5 +87,5 @@ let () =
     | Some a, Some b -> (10 * a) + b
     | _ -> Aoc.raise_input_failure ()
   in
-  let sum = List.fold_left ~f:(fun acc line -> acc + get_cal_val line) ~init:0 input in
+  let sum = input |> List.fold_left ~f:(fun acc line -> acc + get_cal_val line) ~init:0 in
   print_endline (string_of_int sum)
