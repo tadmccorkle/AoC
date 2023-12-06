@@ -2,7 +2,7 @@
 
 Me taking a stab at AoC 2022 with Rust.
 
-Produce solutions for a particular day by running the following from this directory:
+Produce solutions for a particular day by adding the input data set to `input/day{XX}.txt` and running the following from this directory:
 
 ```sh
 cargo run --bin day<num>
