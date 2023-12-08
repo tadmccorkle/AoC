@@ -1,0 +1,4 @@
+* text=auto
+
+*.ml text eol=lf
+*.mli text eol=lf
