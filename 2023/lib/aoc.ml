@@ -24,3 +24,8 @@ let rec print_all lines =
   | x :: rest ->
       print_endline x;
       print_all rest
+
+(* inclusive range [a,b] *)
+let range a b =
+  let rec range a b acc = if b < a then acc else range a (b - 1) (b :: acc) in
+  range a b []
