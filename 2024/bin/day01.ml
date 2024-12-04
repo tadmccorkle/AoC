@@ -1,6 +1,6 @@
 open StdLabels
 
-let input = Aoc.read_input 1
+let input = Aoc.read_input_lines 1
 
 let split line = String.split_on_char ~sep:' ' line |> List.filter ~f:(fun s -> s <> "")
 

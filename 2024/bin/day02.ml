@@ -1,6 +1,6 @@
 open StdLabels
 
-let input = Aoc.read_input 2
+let input = Aoc.read_input_lines 2
 
 module ListEx = struct
   let count ~pred = List.fold_left ~f:(fun acc i -> if pred i then acc + 1 else acc) ~init:0
