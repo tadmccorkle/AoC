@@ -23,9 +23,7 @@ let parse state input =
     match state with
     | MUL pc -> (
         match (pc, input) with
-        | 'm', 'u'
-        | 'u', 'l' ->
-            MUL input
+        | 'm', 'u' | 'u', 'l' -> MUL input
         | 'l', '(' -> LHS (0, 0)
         | _ -> NOP)
     | LHS (ct, lhs) -> (
@@ -40,18 +38,13 @@ let parse state input =
         | _ -> NOP)
     | DO pc -> (
         match (pc, input) with
-        | 'd', 'o'
-        | 'o', '(' ->
-            DO input
+        | 'd', 'o' | 'o', '(' -> DO input
         | '(', ')' -> ON
         | 'o', 'n' -> DONT input
         | _ -> NOP)
     | DONT pc -> (
         match (pc, input) with
-        | 'n', '\''
-        | '\'', 't'
-        | 't', '(' ->
-            DONT input
+        | 'n', '\'' | '\'', 't' | 't', '(' -> DONT input
         | '(', ')' -> OFF
         | _ -> NOP)
     | _ -> NOP
@@ -76,9 +69,7 @@ let () =
         let instr = parse last_instr next_ch in
         match instr with
         | PROD p -> (NOP, enabled, if enabled then sum + p else sum)
-        | ON
-        | OFF ->
-            (NOP, instr = ON, sum)
+        | ON | OFF -> (NOP, instr = ON, sum)
         | res -> (res, enabled, sum))
       ~init:(NOP, true, 0) input
   in

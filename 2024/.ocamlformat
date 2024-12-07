@@ -3,4 +3,4 @@ version = 0.26.2
 
 margin = 100
 module-item-spacing = preserve
-break-cases = all
+break-cases = fit-or-vertical
