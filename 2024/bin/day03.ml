@@ -49,8 +49,13 @@ let parse state input =
         | _ -> NOP)
     | _ -> NOP
 
+let mul_regex =
+  let operand = Re.(repn digit 1 (Some 3)) in
+  Re.(seq [ str "mul("; group operand; char ','; group operand; char ')' ])
+
 (* part 1 *)
 let () =
+  (* using stdlib *)
   let _, sum =
     String.fold_left
       ~f:(fun (last_instr, sum) next_ch ->
@@ -59,10 +64,21 @@ let () =
         | res -> (res, sum))
       ~init:(NOP, 0) input
   in
-  print_endline @@ string_of_int sum
+  print_endline @@ "stdlib: " ^ string_of_int sum;
+
+  (* using re *)
+  let re = Re.compile mul_regex in
+  let sum_mults acc group =
+    let lhs = Re.Group.get group 1 in
+    let rhs = Re.Group.get group 2 in
+    acc + (int_of_string lhs * int_of_string rhs)
+  in
+  let sum = Seq.fold_left sum_mults 0 (Re.Seq.all re input) in
+  print_endline @@ "re:     " ^ string_of_int sum
 
 (* part 2 *)
 let () =
+  (* using stdlib *)
   let _, _, sum =
     String.fold_left
       ~f:(fun (last_instr, enabled, sum) next_ch ->
@@ -73,4 +89,20 @@ let () =
         | res -> (res, enabled, sum))
       ~init:(NOP, true, 0) input
   in
-  print_endline @@ string_of_int sum
+  print_endline @@ "stdlib: " ^ string_of_int sum;
+
+  (* using re *)
+  let do_mark, do_re = Re.(mark @@ str "do()") in
+  let dont_mark, dont_re = Re.(mark @@ str "don't()") in
+  let re = Re.(compile (alt [ mul_regex; do_re; dont_re ])) in
+  let sum_mults (acc, enabled) group =
+    if Re.Mark.test group do_mark then (acc, true)
+    else if Re.Mark.test group dont_mark then (acc, false)
+    else if enabled then
+      let lhs = Re.Group.get group 1 in
+      let rhs = Re.Group.get group 2 in
+      (acc + (int_of_string lhs * int_of_string rhs), enabled)
+    else (acc, enabled)
+  in
+  let sum, _ = Seq.fold_left sum_mults (0, true) (Re.Seq.all re input) in
+  print_endline @@ "re:     " ^ string_of_int sum
