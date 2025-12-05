@@ -1,0 +1,20 @@
+(lang dune 3.20)
+
+(name aoc2025)
+
+(generate_opam_files true)
+
+(source
+ (github tadmccorkle/AoC))
+
+(authors "Tad McCorkle")
+
+(license MIT)
+
+(package
+ (name aoc2025)
+ (synopsis "AoC 2025")
+ (description "Advent of Code 2025, OCaml Edition")
+ (depends ocaml))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

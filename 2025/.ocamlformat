@@ -1,0 +1,6 @@
+profile = default
+version = 0.28.1
+
+margin = 100
+module-item-spacing = preserve
+break-cases = fit-or-vertical
